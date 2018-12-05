@@ -9,18 +9,12 @@ namespace aoc2018.Challenges
     {
         public override string INPUT { get { return "C:/Dev/aoc2018/aoc2018/Input/1a.txt"; } }
 
-        public override void Execute()
-        {
-            A();
-            B();
-        }
-
         public List<int> ParseInput(List<string> input)
         {
             return input.Select(int.Parse).ToList();
         }
 
-        public void A()
+        public override void A()
         {
             CaseName = "1A";
             Start();
@@ -36,7 +30,7 @@ namespace aoc2018.Challenges
             End();
         }
 
-        public void B()
+        public override void B()
         {
             CaseName = "1B";
             Start();

@@ -11,7 +11,13 @@ namespace aoc2018.Challenges
         public Stopwatch Timer { get; set; }
         public abstract string INPUT { get; }
 
-        public abstract void Execute();
+        public void Execute()
+        {
+            A();
+            B();
+        }
+        public abstract void A();
+        public abstract void B();
 
         public void Start()
         {

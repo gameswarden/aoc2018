@@ -10,14 +10,7 @@ namespace aoc2018.Challenges
     {
         public override string INPUT { get { return "C:/Dev/aoc2018/aoc2018/Input/4.txt"; } }
 
-
-        public override void Execute()
-        {
-            A();
-            B();
-        }
-
-        private void A()
+        public override void A()
         {
             CaseName = "4A";
             Start();
@@ -34,7 +27,7 @@ namespace aoc2018.Challenges
             End();
         }
 
-        private void B()
+        public override void B()
         {
             CaseName = "4B";
             Start();
