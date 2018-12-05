@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using aoc2018.Util;
 
 namespace aoc2018.Challenges
