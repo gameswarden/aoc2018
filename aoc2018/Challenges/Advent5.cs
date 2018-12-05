@@ -50,8 +50,8 @@ namespace aoc2018.Challenges
             {
                 var polymer = input[0];
                 var c = (Char)i;
-                polymer = polymer.Replace(c.ToString(), string.Empty);
-                polymer = polymer.Replace(Char.ToUpper(c).ToString(), string.Empty);
+
+                polymer = Regex.Match(polymer, String.Format("[{0}]+", GetReactionRegex(c))).Value;
 
                 while (CanReact(polymer))
                 {
@@ -97,19 +97,40 @@ namespace aoc2018.Challenges
             return (a != b && Char.ToLower(a) == Char.ToLower(b));
         }
 
+        private List<string> _reactions;
+
         private List<string> Reactions
         {
             get
             {
-                var result = new List<string>();
-                for (int i = 'a'; i <= 'z'; i++)
+                if (_reactions == null)
                 {
-                    result.Add(String.Format("{0}{1}", (char)i, Char.ToUpper((char)i)));
-                    result.Add(String.Format("{0}{1}", Char.ToUpper((char)i), (char)i));
+                    var result = new List<string>();
+                    for (int i = 'a'; i <= 'z'; i++)
+                    {
+                        result.Add(String.Format("{0}{1}", (char)i, Char.ToUpper((char)i)));
+                        result.Add(String.Format("{0}{1}", Char.ToUpper((char)i), (char)i));
+                    }
+
+                    _reactions = result;
                 }
 
-                return result;
+
+                return _reactions;
             }
+        }
+
+        private string GetReactionRegex(Char c)
+        {
+            var s = string.Empty;
+
+            foreach(var r in Reactions)
+            {
+                if (!r.StartsWith(c))
+                    s += r;
+            }
+
+            return s;
         }
     }
 }
