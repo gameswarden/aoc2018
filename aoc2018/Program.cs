@@ -9,7 +9,7 @@ namespace aoc2018
         static void Main(string[] args)
         {
             Challenge challenge;
-            challenge = new Advent1();
+            /*challenge = new Advent1();
             challenge.Execute();
 
             challenge = new Advent2();
@@ -22,8 +22,10 @@ namespace aoc2018
             challenge.Execute();
 
             challenge = new Advent5();
-            challenge.Execute();
+            challenge.Execute();*/
 
+            challenge = new Advent6();
+            challenge.Execute();
             Console.ReadLine();
         }
     }
