@@ -41,7 +41,8 @@ namespace aoc2018.Challenges
                 var polymer = input[0];
                 var c = (Char)i;
 
-                polymer = Regex.Match(polymer, String.Format("[{0}]+", GetReactionRegex(c))).Value;
+                polymer = polymer.Replace(c.ToString(), string.Empty);
+                polymer = polymer.Replace(Char.ToUpper(c).ToString(), string.Empty);
 
                 while (CanReact(polymer))
                 {
@@ -51,10 +52,9 @@ namespace aoc2018.Challenges
                 polymers[c] = polymer.Length;
             }
 
-            Console.WriteLine(polymers.Min(p => p.Value));
+            Console.WriteLine("{0}: {1}", polymers.OrderBy(p => p.Value).First().Key, polymers.Min(p => p.Value));
 
             End();
-
         }
 
         private string React(string polymer)
@@ -116,8 +116,8 @@ namespace aoc2018.Challenges
 
             foreach(var r in Reactions)
             {
-                if (!r.StartsWith(c))
-                    s += r;
+                if (!r.Contains(c))
+                    s += r[0];
             }
 
             return s;
