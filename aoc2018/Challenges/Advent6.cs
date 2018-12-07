@@ -18,7 +18,7 @@ namespace aoc2018.Challenges
 
             var coords = ParseInput(input);
 
-            var map = new Dictionary<Point,int>();
+            var map = new Dictionary<Point, int>();
 
             var maxX = coords.Max(c => c.x);
             var maxY = coords.Max(c => c.y);
@@ -30,7 +30,7 @@ namespace aoc2018.Challenges
                     var p = new Point(x, y);
                     var minDist = -1;
                     var coordId = -1;
-                    for(int i = 0; i < coords.Count; i++)
+                    for (int i = 0; i < coords.Count; i++)
                     {
                         var c = coords[i];
                         var distX = Vector.Dist(c.x, p.x);
@@ -69,6 +69,54 @@ namespace aoc2018.Challenges
 
             var finiteAreas = map.Where(c => finiteAreaIds.Contains(c.Value)).ToDictionary(c => c.Key, c => c.Value);
 
+            //DrawMap(coords, finiteAreas);
+
+            var biggestArea = finiteAreas.GroupBy(a => a.Value).OrderByDescending(a => a.Count()).First();
+            Console.WriteLine("{0}: {1}", biggestArea.Key, biggestArea.Count());
+
+            End();
+        }
+
+        public override void B()
+        {
+            CaseName = "6B";
+            Start();
+            var input = Input.GetInputFromFile(INPUT);
+
+            Coordinates = ParseInput(input).ToHashSet();
+            WithinDistance = new HashSet<Point>();
+
+            var region = new HashSet<Point>();
+
+            var avg = new Point((int) Coordinates.Average(c => c.x), (int) Coordinates.Average(c => c.y));
+
+            CheckDistance(avg, null);
+
+            Console.WriteLine(WithinDistance.Count);
+
+            End();
+
+        }
+
+        public List<Point> ParseInput(List<string> input)
+        {
+            var result = new List<Point>();
+            foreach (var i in input)
+            {
+                var coords = Regex.Matches(i, "([\\d]+)");
+                var p = new Point(int.Parse(coords[0].Value),int.Parse(coords[1].Value));
+                result.Add(p);
+            }
+
+            return result;
+        }
+
+        private HashSet<Point> WithinDistance { get; set; }
+
+        private HashSet<Point> Coordinates { get; set; }
+
+        private static void DrawMap(List<Point> coords, Dictionary<Point, int> finiteAreas)
+        {
             var finiteMinX = finiteAreas.Min(c => c.Key.x);
             var finiteMinY = finiteAreas.Min(c => c.Key.y);
             var finiteMaxX = finiteAreas.Max(c => c.Key.x);
@@ -95,44 +143,44 @@ namespace aoc2018.Challenges
 
                 Console.WriteLine(s);
             }
-
-            foreach (var a in finiteAreas.GroupBy(a => a.Value))
-            {
-                Console.WriteLine("{0}: {1}", a.Key, a.Count());
-            }
-
-            End();
         }
 
-        public override void B()
+        public void CheckDistance(Point p, char? direction)
         {
-            CaseName = "6B";
-            Start();
-            var input = Input.GetInputFromFile(INPUT);
+            var withinDistance = Coordinates.Sum(c => Math.Abs(Vector.Dist(c.x, p.x)) + Math.Abs(Vector.Dist(c.y, p.y))) < 10000;
 
-            var coords = ParseInput(input);
-
-            var region = new HashSet<Point>();
-
-            var avg = new Point((int) coords.Average(c => c.x), (int) coords.Average(c => c.y));
-
-            Console.WriteLine(coords.Sum(c => Math.Abs(Vector.Dist(c.x, avg.x)) + Math.Abs(Vector.Dist(c.y, avg.y))));
-
-            End();
-
-        }
-
-        public List<Point> ParseInput(List<string> input)
-        {
-            var result = new List<Point>();
-            foreach (var i in input)
+            if (withinDistance)
             {
-                var coords = Regex.Matches(i, "([\\d]+)");
-                var p = new Point(int.Parse(coords[0].Value),int.Parse(coords[1].Value));
-                result.Add(p);
-            }
+                WithinDistance.Add(p);
 
-            return result;
+                if (direction == 'l')
+                {
+                    CheckDistance(new Point(p.x, p.y - 1), 'u');
+                    CheckDistance(new Point(p.x, p.y + 1), 'd');
+                    CheckDistance(new Point(p.x-1, p.y), 'l');
+                }
+                else if (direction == 'r')
+                {
+                    CheckDistance(new Point(p.x, p.y - 1), 'u');
+                    CheckDistance(new Point(p.x, p.y + 1), 'd');
+                    CheckDistance(new Point(p.x+1, p.y), 'r');
+                }
+                else if (direction == 'u')
+                {
+                    CheckDistance(new Point(p.x, p.y-1), 'u');
+                }
+                else if (direction == 'd')
+                {
+                    CheckDistance(new Point(p.x, p.y+1), 'd');
+                }
+                else
+                {
+                    CheckDistance(new Point(p.x - 1, p.y), 'l');
+                    CheckDistance(new Point(p.x + 1, p.y), 'r');
+                    CheckDistance(new Point(p.x, p.y - 1), 'u');
+                    CheckDistance(new Point(p.x, p.y + 1), 'd');
+                }
+            }
         }
     }
 }
