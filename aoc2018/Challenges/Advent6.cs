@@ -16,66 +16,18 @@ namespace aoc2018.Challenges
             Start();
             var input = Input.GetInputFromFile(INPUT);
 
-            var coords = ParseInput(input);
+            Coordinates = ParseInput(input).ToHashSet();
 
-            var map = new Dictionary<Point, int>();
+            FiniteRegions = new Dictionary<Point, HashSet<Point>>();
+            InfiniteRegions = new HashSet<Point>();
 
-            var maxX = coords.Max(c => c.x);
-            var maxY = coords.Max(c => c.y);
-
-            for (var y = 0; y < maxY + 1; y++)
+            foreach(var c in Coordinates)
             {
-                for (var x = 0; x < maxX + 1; x++)
-                {
-                    var p = new Point(x, y);
-                    var minDist = -1;
-                    var coordId = -1;
-                    for (int i = 0; i < coords.Count; i++)
-                    {
-                        var c = coords[i];
-                        var distX = Vector.Dist(c.x, p.x);
-                        var distY = Vector.Dist(c.y, p.y);
-                        var dist = Math.Abs(distX) + Math.Abs(distY);
-                        if ((dist) == 0)
-                        {
-                            minDist = 0;
-                            coordId = i;
-                        }
-                        else if (minDist == -1 || minDist > dist)
-                        {
-                            minDist = dist;
-                            coordId = i;
-                        }
-                        else if (minDist == dist)
-                        {
-                            coordId = -1;
-                        }
-                    }
-
-                    map[p] = coordId;
-                }
+                CheckRegion(c, c, null);
             }
 
-            var infiniteAreas =
-                map.Where(c => (c.Key.x == 0 || c.Key.y == 0 || c.Key.x == maxX || c.Key.y == maxY) && c.Value != -1).Select(c => c.Value).Distinct();
-
-            var finiteAreaIds = new List<int>();
-
-            for (int i = 0; i < input.Count; i++)
-            {
-                if (!infiniteAreas.Contains(i))
-                    finiteAreaIds.Add(i);
-            }
-
-            var finiteAreas = map.Where(c => finiteAreaIds.Contains(c.Value)).ToDictionary(c => c.Key, c => c.Value);
-
-            //DrawMap(coords, finiteAreas);
-
-            var biggestArea = finiteAreas.GroupBy(a => a.Value).OrderByDescending(a => a.Count()).First();
-            Console.WriteLine("{0}: {1}", biggestArea.Key, biggestArea.Count());
-
-            foreach (var a in infiniteAreas)
-                Console.WriteLine(a);
+            var biggestArea = FiniteRegions.OrderByDescending(a => a.Value.Count()).First();
+            Console.WriteLine("{0}: {1}", input.IndexOf(string.Format("{0}, {1}",biggestArea.Key.x, biggestArea.Key.y)), biggestArea.Value.Count());
             End();
         }
 
@@ -113,6 +65,9 @@ namespace aoc2018.Challenges
             return result;
         }
 
+        private HashSet<Point> InfiniteRegions { get; set; }
+        private Dictionary<Point, HashSet<Point>> FiniteRegions { get; set; }
+
         private HashSet<Point> WithinDistance { get; set; }
 
         private HashSet<Point> Coordinates { get; set; }
@@ -147,6 +102,69 @@ namespace aoc2018.Challenges
             }
         }
 
+        public bool CheckRegion(Point origin, Point p, char? direction)
+        {
+            if (p.x == 0 || p.y == 0 || p.x == Coordinates.Max(c => c.x) || p.y == Coordinates.Max(c => c.y))
+            {
+                if (FiniteRegions.ContainsKey(origin))
+                    FiniteRegions.Remove(origin);
+                return false;
+            }
+
+            var originDist = Math.Abs(Vector.Dist(origin.x, p.x)) + Math.Abs(Vector.Dist(origin.y, p.y));
+            var nearestPoint = Coordinates.Where(c => c.x != origin.x && c.y != origin.y)
+                .OrderBy(c => Math.Abs(Vector.Dist(c.x, p.x)) + Math.Abs(Vector.Dist(c.y, p.y))).First();
+            var dist = Math.Abs(Vector.Dist(nearestPoint.x, p.x)) + Math.Abs(Vector.Dist(nearestPoint.y, p.y));
+
+            if (originDist < dist)
+            {
+                if (!FiniteRegions.ContainsKey(origin))
+                    FiniteRegions[origin] = new HashSet<Point>();
+
+                FiniteRegions[origin].Add(p);
+
+                if (direction == 'l')
+                {
+                    if (!CheckRegion(origin, new Point(p.x, p.y - 1), 'u'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x, p.y + 1), 'd'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x - 1, p.y), 'l'))
+                        return false;
+                }
+                else if (direction == 'r')
+                {
+                    if (!CheckRegion(origin, new Point(p.x, p.y - 1), 'u'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x, p.y + 1), 'd'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x + 1, p.y), 'r'))
+                        return false;
+                }
+                else if (direction == 'u')
+                {
+                    if (!CheckRegion(origin, new Point(p.x, p.y - 1), 'u'))
+                        return false;
+                }
+                else if (direction == 'd')
+                {
+                    if (!CheckRegion(origin, new Point(p.x, p.y + 1), 'd'))
+                        return false;
+                }
+                else
+                {
+                    if (!CheckRegion(origin, new Point(p.x - 1, p.y), 'l'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x + 1, p.y), 'r'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x, p.y - 1), 'u'))
+                        return false;
+                    if (!CheckRegion(origin, new Point(p.x, p.y + 1), 'd'))
+                        return false;
+                }
+            }
+            return true;
+        }
         public void CheckDistance(Point p, char? direction)
         {
             var withinDistance = Coordinates.Sum(c => Math.Abs(Vector.Dist(c.x, p.x)) + Math.Abs(Vector.Dist(c.y, p.y))) < 10000;
