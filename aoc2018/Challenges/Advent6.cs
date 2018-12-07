@@ -74,6 +74,8 @@ namespace aoc2018.Challenges
             var biggestArea = finiteAreas.GroupBy(a => a.Value).OrderByDescending(a => a.Count()).First();
             Console.WriteLine("{0}: {1}", biggestArea.Key, biggestArea.Count());
 
+            foreach (var a in infiniteAreas)
+                Console.WriteLine(a);
             End();
         }
 
