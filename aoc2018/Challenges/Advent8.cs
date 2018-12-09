@@ -42,9 +42,9 @@ namespace aoc2018.Challenges
         {
             var node = new Node();
             var childCount = int.Parse(TreeDef[0].Value);
-            TreeDef = TreeDef.Skip(1).ToList();
+            TreeDef.RemoveAt(0);
             var metadataCount = int.Parse(TreeDef[0].Value);
-            TreeDef = TreeDef.Skip(1).ToList();
+            TreeDef.RemoveAt(0);
 
             node.Children = new List<Node>();
             for (int i = 0; i < childCount; i++)
@@ -56,7 +56,7 @@ namespace aoc2018.Challenges
             for (int i = 0; i < metadataCount; i++)
             {
                 node.Metadata.Add(int.Parse(TreeDef[0].Value));
-                TreeDef = TreeDef.Skip(1).ToList();
+                TreeDef.RemoveAt(0);
             }
             return node;
         }
