@@ -28,9 +28,12 @@ namespace aoc2018
             challenge.Execute();
 
             challenge = new Advent7();
-            challenge.Execute();*/
+            challenge.Execute();
 
             challenge = new Advent8();
+            challenge.Execute();*/
+
+            challenge = new Advent9();
             challenge.Execute();
 
             Console.ReadLine();
