@@ -25,20 +25,18 @@ namespace aoc2018.Challenges
                 Players.Add(i,0);
             }
 
-            Marbles = new List<long>();
-            CurrentMarble = 0;
             CurrentPlayer = 0;
 
-            AddMarble(0);
-            for (long i = 1; i < lastScore; i++)
+            Add(0);
+            for (int i = 1; i < lastScore; i++)
             {
                 if (i % 23 == 0 && i != 0)
                 {
                     Players[CurrentPlayer] += i;
-                    RemoveMarble();
+                    Remove();
                 }
                 else
-                    AddMarble(i);
+                    Add(i);
                 if (CurrentPlayer < Players.Count -1)
                     CurrentPlayer = CurrentPlayer + 1;
                 else
@@ -51,33 +49,7 @@ namespace aoc2018.Challenges
         }
 
         public Dictionary<int, long> Players { get; set; }
-        public List<long> Marbles { get; set; }
-        public long CurrentMarble { get; set; }
         public int CurrentPlayer { get; set; }
-
-        public void AddMarble(long marble)
-        {
-            int pos = 0;
-            if (Marbles.Count != 0)
-            {
-                pos = (int)CurrentMarble + 1;
-                pos %= Marbles.Count;
-            }
-
-            if (pos + 1 == Marbles.Count || Marbles.Count == 0)
-                Marbles.Add(marble);
-            else
-                Marbles.Insert(pos + 1, marble);
-            CurrentMarble = pos + 1;
-        }
-
-        public void RemoveMarble()
-        {
-            var pos = CurrentMarble - 7;
-            CurrentMarble = Math.Abs(pos % Marbles.Count);
-            Players[CurrentPlayer] += Marbles[(int)CurrentMarble];
-            Marbles.RemoveAt((int)CurrentMarble);
-        }
 
         public override void B()
         {
@@ -95,23 +67,18 @@ namespace aoc2018.Challenges
                 Players.Add(i, 0);
             }
 
-            Marbles = new List<long>();
-            CurrentMarble = 0;
             CurrentPlayer = 0;
 
-            AddMarble(0);
+            Add(0);
             for (int i = 1; i < lastScore * 100; i++)
             {
-                if (i % 100000 == 0)
-                    Console.WriteLine(i);
-
                 if (i % 23 == 0 && i != 0)
                 {
                     Players[CurrentPlayer] += i;
-                    RemoveMarble();
+                    Remove();
                 }
                 else
-                    AddMarble(i);
+                    Add(i);
                 if (CurrentPlayer < Players.Count - 1)
                     CurrentPlayer = CurrentPlayer + 1;
                 else
@@ -124,5 +91,52 @@ namespace aoc2018.Challenges
 
         }
 
+        public void Add(int i)
+        {
+            if (i > 0)
+            {
+                LastMarble = LastMarble.Clockwise(1);
+                var newMarble = new Marble { Id = i };
+                newMarble.Right = LastMarble.Right;
+                newMarble.Left = LastMarble;
+                newMarble.Left.Right = newMarble;
+                newMarble.Right.Left = newMarble;
+                LastMarble = newMarble;
+            }
+            else
+            {
+                LastMarble = new Marble {Id = 0};
+                LastMarble.Left = LastMarble;
+                LastMarble.Right = LastMarble;
+            }
+        }
+
+        public void Remove()
+        {
+            LastMarble = LastMarble.CounterClockwise(7);
+            LastMarble.Left.Right = LastMarble.Right;
+            LastMarble.Right.Left = LastMarble.Left;
+            Players[CurrentPlayer] += LastMarble.Id;
+            LastMarble = LastMarble.Right;
+        }
+
+        public Marble LastMarble { get; set; }
+    }
+
+    public class Marble
+    {
+        public int Id { get; set; }
+        public Marble Left { get; set; }
+        public Marble Right { get; set; }
+
+        public Marble Clockwise(int i)
+        {
+            return i == 0 ? this : Right.Clockwise(i - 1);
+        }
+
+        public Marble CounterClockwise(int i)
+        {
+            return i == 0 ? this : Left.CounterClockwise(i - 1);
+        }
     }
 }
