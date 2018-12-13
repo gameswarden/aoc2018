@@ -68,7 +68,8 @@ namespace aoc2018.Challenges
 
             var serial = int.Parse(INPUT);
 
-            var fuelCells = new Dictionary<Point, int>();
+            var fuelCells = new int [300,300];
+            var sums = new int [300,300];
 
             for (var y = 0; y < 300; y++)
             {
@@ -78,7 +79,8 @@ namespace aoc2018.Challenges
                     var rackId = x + 10;
                     var powerLevelStart = rackId * y;
                     var powerLevel = ((((powerLevelStart + serial) * rackId) % 1000) / 100) - 5;
-                    fuelCells[new Point(x, y)] = powerLevel;
+                    fuelCells[x,y] = powerLevel;
+
                     //if (powerLevel > 0)
                     //    s += "+";
                     //else if (powerLevel < 0)
@@ -90,30 +92,59 @@ namespace aoc2018.Challenges
                 //Console.WriteLine(s);
             }
 
-            
+            for (int i = 0; i < fuelCells.GetLength(0); i++)
+            {
+                for (int j = 0; j < fuelCells.GetLength(1); j++)
+                {
+                    if (i == 0 && j == 0)
+                        sums[i, j] = fuelCells[i, j];
+                    else if (j == 0)
+                        sums[i, j] = sums[i - 1, j] + fuelCells[i, j];
+                    else if (i == 0)
+                        sums[i, j] = sums[i, j - 1] + fuelCells[i, j];
+                    else
+                        sums[i, j] = sums[i - 1, j] + sums[i, j - 1] - sums[i - 1, j - 1] + fuelCells[i, j];
+                }
+            }
 
-            Console.WriteLine("{0}: {1}",regions.OrderByDescending(r => r.Value).First().Key, regions.OrderByDescending(r => r.Value).First().Value);
+            var maxArea = int.MinValue;
+
+            for (int rowStart = 0; rowStart < sums.GetLength(0); rowStart++)
+            {
+                for (int rowEnd = rowStart; rowEnd < sums.GetLength(0); rowEnd++)
+                {
+                    for (int colStart = 0; colStart < sums.GetLength(1); colStart++)
+                    {
+                        for (int colEnd = colStart; colEnd < sums.GetLength(1); colEnd++)
+                        {
+                            if (colEnd - colStart == rowEnd - rowStart)
+                            {
+                                var area = ComputeSum(sums, rowStart, rowEnd, colStart, colEnd);
+                                if (area > maxArea)
+                                {
+                                    maxArea = area;
+                                    Console.WriteLine("{0}x{0} grid at ({1},{2}) - Max Sum: {3}", rowEnd - rowStart + 1, rowStart, colStart, area);
+                                }
+                            }   
+                        }
+                    }
+                }
+            }
+
+            //Console.WriteLine("{0}: {1}",regions.OrderByDescending(r => r.Value).First().Key, regions.OrderByDescending(r => r.Value).First().Value);
             End();
         }
 
-        public Dictionary<Point, int> ShrinkRegion(Dictionary<Point, int> region)
+        public int ComputeSum(int[,] sums, int i1, int i2, int j1, int j2)
         {
-            var minX = region.Min(p => p.Key.x);
-            var maxX = region.Max(p => p.Key.x);
-            var minY = region.Min(p => p.Key.y);
-            var maxY = region.Max(p => p.Key.y);
-
-            var topEdge = region.Where(p => p.Key.x == minY);
-            var bottomEdge = region.Where(p => p.Key.y == maxY);
-            var leftEdge = region.Where(p => p.Key.x == minX);
-            var rightEdge = region.Where(p => p.Key.x == maxX);
-
-            var topRight = topEdge.Union(rightEdge).Sum(c => c.Value);
-            var topLeft = topEdge.Union(leftEdge).Sum(c => c.Value);
-            var bottomRight = bottomEdge.Union(rightEdge).Sum(c => c.Value);
-            var bottomLeft = bottomEdge.Union(leftEdge).Sum(c => c.Value);
-
-            
+            if (i1 == 0 && j1 == 0)
+                return sums[i2, j2];
+            else if (i1 == 0)
+                return sums[i2, j2] - sums[i2, j1 - 1];
+            else if (j1 == 0)
+                return sums[i2, j2] - sums[i1 - 1, j2];
+            else
+                return sums[i2, j2] - sums[i2, j1 - 1] - sums[i1 - 1, j2] + sums[i1 - 1, j1 - 1];
         }
     }
 }
